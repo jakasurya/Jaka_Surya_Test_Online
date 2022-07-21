@@ -94,7 +94,7 @@ class UsersServices {
   }
 
   Future transferInquiry(String src, String dst, double amount) async {
-    var content = {"accountSrcId": src, "accountDstId ": dst, "amount": amount};
+    var content = {"accountSrcId": src, "accountDstId": dst, "amount": amount};
 
     final response = await httpClient_.post(transferInquiryRequest,
         headers: headerWithSession(), body: jsonEncode(content));
@@ -102,7 +102,6 @@ class UsersServices {
       return warningDialog(response.body);
     } else {
       var result = response.body;
-      debugPrint(result);
       box
           .write('transfer', result)
           .then((_) => Get.toNamed(PagesName.transferConfirm));
@@ -111,15 +110,20 @@ class UsersServices {
   }
 
   Future transferConfirm() async {
-    var content =
-        '{"accountSrcId": "${getTransferData().accountSrcId}","accountDstId ": "${getTransferData().accountDstId}","amount":${getTransferData().amount},"inquiryId":"${getTransferData().inquiryId}"}';
+    var content = {
+      "accountSrcId": getTransferData().accountSrcId,
+      "accountDstId": getTransferData().accountDstId,
+      "amount": getTransferData().amount,
+      "inquiryId": getTransferData().inquiryId
+    };
 
     final response = await httpClient_.post(transferConfirmRequest,
-        headers: headerWithSession(), body: content);
+        headers: headerWithSession(), body: jsonEncode(content));
     if (response.statusCode != 200) {
       return response.body;
     } else {
       var result = response.body;
+      debugPrint(result);
       Get.put(TransferController()).saveHistoryItem(response.body);
       return result;
     }
